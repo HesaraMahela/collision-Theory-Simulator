@@ -1,6 +1,6 @@
-from vpython import rate, label, vector, mag, color, box
+from vpython import rate, label, vector, color, box
 from atoms import Atom
-
+from calculations import *
 # Simulation parameters
 temperature = 100  # Temperature in Kelvin
 atom_count = 4  # Number of atoms
@@ -30,43 +30,6 @@ kinetic_energy_label = label(pos=vector(0, 1, 0), text='Kinetic Energy: ', box=F
 pressure_label = label(pos=vector(0, 4, 0), text='Pressure: ', box=False, height=10)
 
 
-def calculate_kinetic_energy():
-    total_ke = 0
-    for atom in atom_list:
-        speed_squared = mag(atom.velocity) ** 2
-        total_ke += 0.5 * atom.weight * speed_squared
-    return total_ke
-
-
-def calculate_pressure(ke_total, volume):
-    return (2 / 3) * (ke_total / volume)
-
-
-def calculate_average_speed(atom_list_):
-    total_speed = 0
-    for atom in atom_list:
-        total_speed += atom.get_speed()
-    return total_speed
-
-
-def calculate_micro_pressure(atom_list, dt):
-    momentum_change = 0
-    for atom in atom_list:
-        # Calculate momentum change for wall collisions
-        if abs(atom.position.x) > xmax - atom.radius:
-            momentum_change += 2 * atom.weight * abs(atom.velocity.x)
-        if abs(atom.position.y) > ymax - atom.radius:
-            momentum_change += 2 * atom.weight * abs(atom.velocity.y)
-        if abs(atom.position.z) > zmax - atom.radius:
-            momentum_change += 2 * atom.weight * abs(atom.velocity.z)
-
-    # Average force over the time step
-    force = momentum_change / dt
-    # Pressure is force divided by the area of the walls
-    surface_area = 2 * (2 * xmax * 2 * ymax + 2 * xmax * 2 * zmax + 2 * ymax * 2 * zmax)
-    pressure = force / surface_area
-    return pressure
-
 
 # Simulation loop
 dt = 0.001
@@ -89,7 +52,7 @@ while True:
             atom.handle_collision(atom_list[j])
 
         # Calculate total kinetic energy
-    total_kinetic_energy = calculate_kinetic_energy()
+    total_kinetic_energy = calculate_kinetic_energy(atom_list)
     kinetic_energy_label.text = f'Total Kinetic Energy: {total_kinetic_energy} J'
 
     # Calculate pressure
