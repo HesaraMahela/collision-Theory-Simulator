@@ -2,8 +2,8 @@ from vpython import rate, label, vector, color, box
 from atoms import Atom
 from calculations import *
 # Simulation parameters
-temperature = 100  # Temperature in Kelvin
-atom_count = 4  # Number of atoms
+temperature = 300  # Temperature in Kelvin
+atom_count = 6  # Number of atoms
 xmax = 10
 ymax = 10
 zmax = 10

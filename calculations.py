@@ -3,9 +3,10 @@ from vpython import mag
 
 def calculate_kinetic_energy(atom_list_):
     total_ke = 0
+    m = 1.66053906660e-27
     for atom in atom_list_:
         speed_squared = mag(atom.velocity) ** 2
-        total_ke += 0.5 * atom.weight * speed_squared
+        total_ke += 0.5 * atom.weight * m * speed_squared
     return total_ke
 
 
