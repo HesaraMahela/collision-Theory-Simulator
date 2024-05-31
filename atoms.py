@@ -15,7 +15,9 @@ class Atom:
         self.atom = sphere(pos=self.position, radius=self.radius, color=self.color)
 
     def update(self):
-        self.atom = sphere(pos=self.position, radius=self.radius, color=self.color)
+        self.atom.pos = self.position
+        self.atom.radius = self.radius
+        self.atom.color = self.color
 
     def update_position(self, dt):
         self.position += self.velocity * dt
@@ -73,3 +75,6 @@ class Atom:
         vz = speed * math.cos(phi)
 
         return vector(vx, vy, vz)
+
+    def get_speed(self):
+        return mag(self.velocity)
