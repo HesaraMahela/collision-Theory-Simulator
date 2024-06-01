@@ -1,8 +1,8 @@
 # collision-Theory-Simulator
 very simple **unfinished** collision theory simulator 
 
-# How to change parameters and stuff
-change variables in the **main.py** file
+### How to change parameters and stuff
+change variables in **main.py** file
 
 ### requirements 
 vpython library is used to display the movements

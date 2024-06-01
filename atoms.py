@@ -2,7 +2,7 @@ import math
 
 from vpython import vector, color, sphere, mag, norm
 from random import randrange, gauss, random, uniform
-from molecule import Molecule
+
 
 class Atom:
 
@@ -69,7 +69,6 @@ class Atom:
         other.is_molecule = True
         self.is_bonded = True
         other.is_bonded = True
-        Molecule(self, other)
 
 
     def maxwell_boltzmann_speed(self, temperature):
