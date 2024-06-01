@@ -2,24 +2,43 @@ from vpython import rate, label, vector, color, box
 from atoms import Atom
 from calculations import *
 # Simulation parameters
+from molecule import Molecule
+
 temperature = 300  # Temperature in Kelvin
 atom_count = 6  # Number of atoms
-xmax = 10
-ymax = 10
+activation_energy = 1e-10 # activation energy for forming a molecule
+xmax = 20
+ymax = 20
 zmax = 10
 volume = (2 * xmax) * (2 * ymax) * (2 * zmax)  # Volume of the box
 
 # Create atoms with velocities based on temperature
-atom_list = [Atom(5, temperature) for _ in range(atom_count)]
+atom_list = []
+molecule_list =[]
 
 # Change or add atoms
-special_atom = atom_list[0]
-special_atom.velocity = vector(0, 0, 0)
-special_atom.weight = 131
-special_atom.radius = 2.16
-special_atom.color = color.cyan
-special_atom.update()
-# atom_list.append(special_atom)
+for _ in range(10):
+    special_atom = Atom(10, temperature)
+    # special_atom.velocity = vector(0, 0, 0)
+    special_atom.symbol ="H"
+    special_atom.weight = 1
+    special_atom.radius = 1.2
+    special_atom.color = color.cyan
+    special_atom.update()
+    atom_list.append(special_atom)
+
+for _ in range(5):
+
+    special_atom = Atom(5, temperature)
+    special_atom.symbol = "Cl"
+    special_atom.velocity = vector(0, 0, 0)
+    special_atom.weight = 35.5
+    special_atom.radius = 1.7
+    special_atom.color = color.purple
+    special_atom.update()
+    atom_list.append(special_atom)
+
+
 
 # Create the box
 container = box(pos=vector(0, 0, 0), size=vector(2 * xmax, 2 * ymax, 2 * zmax), color=color.white, opacity=0.1)
@@ -32,12 +51,16 @@ pressure_label = label(pos=vector(0, 4, 0), text='Pressure: ', box=False, height
 
 
 # Simulation loop
-dt = 0.001
+dt = 0.0001
 while True:
-    rate(50)  # Run 100 iterations per second
+    rate(100)  # Run 100 iterations per second
 
     for i, atom in enumerate(atom_list):
-        atom.update_position(dt)
+        if not atom.is_molecule:
+            atom.update_position(dt)
+        else:
+            for molecule in molecule_list:
+                molecule.update_position(dt)
 
         # Handle collisions with walls
         if abs(atom.position.x) > xmax - atom.radius:
@@ -48,8 +71,11 @@ while True:
             atom.velocity.z = -atom.velocity.z
 
         # Handle collisions with other atoms
-        for j in range(0, len(atom_list)):
-            atom.handle_collision(atom_list[j])
+        for j in range(i + 1, len(atom_list)):
+            if not atom_list[j].is_molecule:
+                if atom.handle_collision(atom_list[j], activation_energy):
+                    molecule_list.append(Molecule(atom, atom_list[j]))  # Add the new molecule to the list
+
 
         # Calculate total kinetic energy
     total_kinetic_energy = calculate_kinetic_energy(atom_list)

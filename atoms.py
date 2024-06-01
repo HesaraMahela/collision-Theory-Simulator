@@ -2,17 +2,20 @@ import math
 
 from vpython import vector, color, sphere, mag, norm
 from random import randrange, gauss, random, uniform
-
+from molecule import Molecule
 
 class Atom:
 
     def __init__(self, range_, temperature):
+        self.symbol = "He"
         self.position = vector(uniform(-range_, range_), uniform(-range_, range_), uniform(-range_, range_))
         self.radius = 1.4
         self.color = color.blue
         self.velocity = self.set_velocity(temperature)
         self.weight = 4
         self.atom = sphere(pos=self.position, radius=self.radius, color=self.color)
+        self.is_molecule = False
+        self.is_bonded = False  # if bonded do not update the position
 
     def update(self):
         self.atom.pos = self.position
@@ -20,25 +23,36 @@ class Atom:
         self.atom.color = self.color
 
     def update_position(self, dt):
-        self.position += self.velocity * dt
-        self.atom.pos = self.position  # Update the visual position
+        if not self.is_molecule:
+            self.position += self.velocity * dt
+            self.atom.pos = self.position  # Update the visual position
+
+        elif not self.is_bonded:  # To ensure only one time position is updated
+            self.update_position(dt)
 
     def detect_collision(self, other):
         distance = mag(self.position - other.position)
         return distance < (self.radius + other.radius)
 
-    def handle_collision(self, other):
+    def handle_collision(self, other, activation_energy):
         if self.detect_collision(other):
-            # Calculate the normal and tangential components of the velocities
+            # Calculate the relative kinetic energy
+            kinetic_energy = 0.5 * (self.weight * mag(self.velocity) ** 2 + other.weight * mag(other.velocity) ** 2)
+
+            # If the kinetic energy exceeds the activation energy, form a molecule
+            if kinetic_energy > activation_energy:
+                if not self.is_molecule and not other.is_molecule:
+                    self.form_molecule(other)
+                    return True
+
+            # Otherwise, handle the collision normally
             collision_normal = norm(self.position - other.position)
             relative_velocity = self.velocity - other.velocity
-
-            # Project the relative velocity onto the normal direction
             velocity_along_normal = relative_velocity.dot(collision_normal)
 
             # Only handle the collision if the atoms are moving towards each other
             if velocity_along_normal > 0:
-                return
+                return False
 
             # Calculate the impulse scalar
             impulse_magnitude = (2 * velocity_along_normal) / (self.weight + other.weight)
@@ -46,6 +60,16 @@ class Atom:
             # Apply the impulse to the velocities
             self.velocity -= impulse_magnitude * other.weight * collision_normal
             other.velocity += impulse_magnitude * self.weight * collision_normal
+
+        return False
+
+    def form_molecule(self, other):
+        self.is_molecule = True
+        other.is_molecule = True
+        self.is_bonded = True
+        other.is_bonded = True
+        Molecule(self, other)
+
 
     def maxwell_boltzmann_speed(self, temperature):
         """Generate a speed based on the Maxwell-Boltzmann distribution."""
