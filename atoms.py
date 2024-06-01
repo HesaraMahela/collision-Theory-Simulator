@@ -42,8 +42,9 @@ class Atom:
             # If the kinetic energy exceeds the activation energy, form a molecule
             if kinetic_energy > activation_energy:
                 if not self.is_molecule and not other.is_molecule:
-                    self.form_molecule(other)
-                    return True
+                    if self.symbol == "H" and other.symbol == "Cl":
+                        self.form_molecule(other)
+                        return True
 
             # Otherwise, handle the collision normally
             collision_normal = norm(self.position - other.position)
